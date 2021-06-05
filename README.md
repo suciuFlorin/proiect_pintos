@@ -9,11 +9,34 @@
 - Ovidiu Miches
 - Florin Suciu
 
-## Threads
+## 1. Threads
 
-   - Alarm Clock
-   - Priority Scheduling
-   - Advanced Scheduler
+- Alarm Clock
+- Priority Scheduling
+- Advanced Scheduler
+
+## 2. User Programs
+
+- Process Termination Messages
+- Argument Passing
+-  System Calls
+- Denying Writes to Executables
+
+## 3. Virtual Memory
+
+- Paging
+- Stack Growth
+- Memory Mapped Files
+- Accessing User Memory
+
+## 4. File Systems
+
+- Indexed and Extensible Files
+- Subdirectories
+- Buffer Cache
+- Synchronization
+
+# 1. Threads
 
 # Alarm Clock
 
@@ -107,3 +130,69 @@ Mentinem functionalitatea deja existenta a proiectului pintos iar toate listele 
 # Advanced Scheduler
 
 Nu exista adaugari
+
+# 2. User Programs
+
+// de adaugat
+
+# 3. Virtual Memory
+
+# PAGING
+
+
+### ALGORITM
+
+> Vom descrie in cateva randuri codul folosit pentru localizarea fisierului cadru, daca exista unul, ce contine informatii despre o anume pagina
+Fiecare structură de pagină are un număr de membri asociați, inclusiv structura cadru care conține datele sale fizice. Structura cadrului conține un pointer către adresa virtuală a nucleului care deține datele sale și o referință la pagina care o deține. Când pagina este creată inițial, cadrul său este setat la NULL - nu primește un cadru până nu este alocat unul prin intermediul funcției `frame_alloc_and_lock()` din `frame.c` (numită de funcția do_page_in ()).
+
+Procesul de găsire a unui cadru liber în memorie este realizat de `frame_alloc_and_lock()`. Face mai multe încercări de a asigura o regiune liberă de memorie în care să aloce noul cadru. Dacă nu există nicio bucată de memorie de dimensiunea unui cadru, atunci un cadru existent trebuie evacuat pentru a face loc celui nou. După găsirea / crearea unui nou cadru, cadrul este returnat și asociat cu pagina care l-a solicitat `(p-> frame = frame și f-> page = page)`. Dacă dintr-un anumit motiv `frame_alloc_and_lock()` nu reușește să găsească un cadru existent de evacuat, NULL este returnat și nu este alocat niciun cadru.
+
+### SINCRONIZARE
+
+> Când două procese de utilizator au nevoie de un nou cadru în același timp, cum sunt evitate cursele?
+Căutarea în tabelul de cadre (de obicei pentru a găsi un cadru liber) este limitată la un singur proces la un moment dat prin intermediul unui blocaj numit scan_lock. Nu există două procese care pot asigura același cadru simultan, iar condițiile de cursă sunt evitate. În plus, fiecare cadru individual conține propriul blocaj (f-> lock) care indică dacă este sau nu ocupat.
+
+# PAGING CATRE SI DE PE DISC
+
+### ALGORITM
+
+> Când este necesar un cadru, dar niciunul nu este liber, trebuie să fie un cadru evacuat. Vom descrie algoritmul utilizat pentru a alege un cadru de evacuat.
+
+Dacă toate cadrele sunt ocupate, trebuie să stabilim un cadru bun de evacuat. Ținând cont de cache și locatie, obiectivul nostru este de a evacua acele cadre care au fost accesate cel mai recent - algoritmul pentru a face acest lucru este implementat în `try_frame_alloc_and_lock()` în `„frame.c”`.
+
+În cazul în care cadrul căutat nu are nici o pagină asociată cu acesta, dobândim imediat acel cadru. În caz contrar, obținem primul cadru care nu a fost accesat recent. Dacă toate cadrele au fost accesate recent, atunci vom repeta peste fiecare cadru. De data aceasta, este foarte probabil ca un cadru valid să fie achiziționat deoarece funcția `page_accessed_recently()` modifică starea de acces a unui cadru la apelare. Dacă din orice motiv a doua iterație nu produce cadre valide, atunci NULL este returnat și niciun cadru nu este evacuat.
+
+> Vom explica modul in care am gandit algoritmul sa decida daca o eroare de pagina pentru o adresa virtuală nevalidă ar trebui să determine extinderea stivei în pagina care a dat greș.
+
+Există două verificări importante care trebuie făcute înainte ca o pagină să fie alocată. În primul rând, adresa paginii trebuie să se afle în spațiul alocat stivei (care este implicit 1 MB). În al doilea rând, adresa paginii  trebuie să se afle în limita a 32 de octeți de firele `user_esp`. Facem acest lucru pentru a ține cont de comenzile care gestionează memoria stivei, inclusiv comenzile `PUSH` și `PUSHA` care vor accesa cel mult 32 de octeți dincolo de indicatorul stivei.
+
+# MEMORY MAPPED FILES
+
+### ALGORITM
+
+> Descrieți modul în care fișierele mapate de memorie se integrează în subsistemul de memorie virtuală.Explicați cum defecțiunile paginii și procesele de evacuare diferă între paginile de schimb și alte pagini
+
+Fișierele mapate de memorie sunt încapsulate într-o structură numită `mapare` situată în
+, `syscall.c`. Fiecare mapare conține o referință la adresa sa din memorie și fișierul pe care
+îl mapează. Fiecare fir conține o listă a tuturor fișierelor mapate la acel fir, care poate
+fi utilizat pentru a gestiona fișierele care sunt prezente direct în memorie. În caz contrar,
+paginile care conțin informații despre fișierele mapate de memorie sunt gestionate la fel ca 
+orice altă pagină.
+
+
+Procesul de defecțiune și evacuare a paginii diferă ușor pentru paginile aparținând fișierelor
+mapate cu memorie. Paginile care nu au legătură cu fișierele sunt mutate într-o partiție swap
+la evacuare, indiferent dacă pagina este murdară sau nu. Când sunt evacuate, paginile de fișier
+cartografiate cu memorie trebuie redactate în fișier numai dacă sunt modificate. În caz contrar,
+nu este necesară scrierea - partiția de swap este evitată împreună pentru fișierele mapate cu
+memorie.
+
+
+> Explicați cum determinați dacă o nouă mapare de fișiere se suprapune unui segment existent.
+
+
+Pagini pentru o nouă mapare a fișierelor sunt alocate numai dacă se găsesc pagini libere și
+neaccepate. Funcția `page_allocated()` are acces la toate mapările de fișiere și va refuza să
+aloce orice spațiu care este deja ocupat. Dacă un nou fișier încearcă să încalce spațiul deja
+mapat, acesta este imediat nemapat și procesul eșuează.
+
