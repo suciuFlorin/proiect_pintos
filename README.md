@@ -133,7 +133,95 @@ Nu exista adaugari
 
 # 2. User Programs
 
-// de adaugat
+# Process Termination Messages
+
+Ori de câte ori un proces de utilizator se termină, deoarece utilizatorul a apelat exit sau din orice alt motiv, vom numele procesului și codul de ieșire, formatate ca și cum ar fi imprimate de `printf("% s: exit (% d) \ n", ...);`. 
+
+Numele tipărit este numele complet transmis de `proces_execute()`, omițând argumentele din linia de comandă. 
+
+Aceste mesaje nu se trasmit când un fir de nucleu care nu este un proces de utilizator se termină sau când este apelat sistemul de oprire a apelului.
+
+Mesajul este opțional când un proces nu se încarcă.
+
+
+În afară de aceasta, nu se tiparesc alte mesaje pe care Pintos, așa cum sunt furnizate, nu le imprimă deja. 
+
+Putem găsi mesaje suplimentare utile în timpul depanării, dar acestea vor confunda scripturile de notare și, astfel, vor ingreuna aplicatia.
+
+
+# Argument Passing
+
+`process_execute()` nu acceptă trecerea argumentelor la noi procese, insa noi am implementat această funcționalitate, extinzând `process_execute()` astfel încât, în loc de a lua pur și simplu un nume de fișier de program ca argument, îl împarte în cuvinte în spații. Primul cuvânt este numele programului, al doilea cuvânt este primul argument și așa mai departe.
+
+Adică `proces_execute("grep foo bar")` ar trebui să ruleze grep trecând două argumente foo și bar.
+
+În cadrul unei linii de comandă, mai multe spații sunt echivalente cu un singur spațiu, astfel încât `process_execute(„grep foo bar”)` este echivalent cu exemplul nostru original. Putem impune o limită rezonabilă pentru lungimea argumentelor din linia de comandă. De exemplu, putem limita argumentele la cele care se vor încadra într-o singură pagină (4 kB). (Nu ne bazam pe limita pe argumentele din linia de comandă de maxim 128 octeți pe care utilitarul pintos le poate transmite nucleului.)
+
+Putem analiza șirurile de argumente în orice mod dorim. Pentru a ne fi mai usor, ne uitam la `strtok_r()`, prototipat în lib / `string.h` și implementat cu comentarii amănunțite în lib / `string.c`. Puteți afla mai multe despre acest lucru uitându-vă la pagina man (rulați man `strtok_r` la prompt).  
+       
+>Nu este partea de sus a stivei în memoria virtuală a nucleului?
+
+Partea de sus a stivei este la PHYS_BASE, de obicei `0xc0000000`, care este, de asemenea, de unde începe memoria virtuală a nucleului. Dar înainte ca procesorul să împingă datele pe stivă, acesta scade indicatorul stivei. Astfel, prima valoare (4 octeți) împinsă pe stivă va fi la adresa `0xbffffffc`.
+
+>PHYS_BASE este fixa?
+
+Nu. Ar trebui să puteți accepta valori PHYS_BASE care sunt orice multiplu de `0x10000000` de la `0x80000000` la `0xf0000000`, pur și simplu prin recompilare.
+
+# System Calls
+
+Implementați sistemul de gestionare a apelurilor în `userprog/syscall.c` Implementarea 
+scheletului pe care o oferim ,,handles" prin incheierea procesului. Va trebui să recupereze numpărul
+de apel de sistem, apoi orice argument de apel de sistem și să efectueze acșiunile adecvate.
+
+Implementați următoarele apeluri de sistem. Prototipurile enumerate unt cele văzute de un 
+program de utilizator care include `lib/user/syscall.h` . (Acest antet și toate celelalte din lib/ user
+sunt utilizate numai de programele utilizatorului.) Numerele de apel de sistem pentru fiecare apel de
+sistem sunt definite în `lib/syscall-nr.h` .
+
+    System Call: void halt(void)
+    Încetează Pintos apelând shutdown_power_off() (declarat în threads/init.h). Acest lucru ar
+    trebui rar folosit, deoarece pierdeți căteva informații despre posibile situații de blocare etc.
+
+	System Call: void exit(int status) 
+	Termină programul curent de utilizator, returnând starea nucleului. Dacă părintele procesului
+îl așteaptă, acesta este starea care va fi returnată. În mod convențional, o stare 0 indică succesul,
+iar valorile diferite de zero indică erori.
+
+	System Call: pid_t exec (const char *cmd_line)
+	Rulează executabilul al cărui nume este dat în cmd_line, trecând orice argumente date și 
+returnează codul de program al nouli proces (pid). Trebuie să returnați pid -1, care altfel nu ar trebui
+să fie un pid valid, dacă programul părinte nu poate încărca sau rula din orice motiv. Altfel, 
+procesul părinte nu se poate întoarce de la execut până când nu știe dacă procesul copil și-a
+încărcat cu succes executabilul. Trebuie să utilizați sincronizarea adecvată pentru a vă asigura
+acest lucru.
+
+	System Call: bool create (const char*file, unsigned initial_size)
+	Creează un fișier nou numit fișier initial_size bytes in size. Returnează adevărat dacă are
+succes, fals în caz contrar. Crearea unui fișier nou nu îl deschide: deschiderea noului fișier este
+o operație separată care ar necesota un apel de sistem deschis.
+
+	System Call: bool remove(const char *file)
+	Șterge fișierul numit fișier. Retunează adevărat dacă are succes, fals în caz contrat.
+Un fișier poate fi eliminat indiferent dacă este deschis sau închis, iar eliminarea unui fișier 
+deschis nu îl închide.
+
+	System Call: int open(const char *file)
+	Deschide fișierul numit fișier. Returnează un mâner întreg negativ numit „descriptor de fișier"
+(fd) sau -1 dacă fițierul nu a putut fi deschis.
+
+
+# Denying Writes to Executables
+
+	Adăugați cod pentru a refuza scrierile în fișierele utilizate ca executabile.
+Multe sisteme de operare fac acest lucru din cauza rezultatelor imprevizibile
+dacă un proces a încercat să ruleze cod care se afla în mijlocul modificării pe disc.
+	
+	Pentru a preveni scrierea într-un fișier deschis utilizăm funcția 
+`file_denu_write()`. Apelarea `file_allow_write()` pe fișier le va reactiva (cu excepția
+cazului în care fișierul este refuzat, scrie de către un alt program de deschidere). 
+Închiderea unui fișier va reactiva, de asemenea, scrierile. Astfel, pentru a refuza 
+scrierea la executabilul unuo proces, trebuie să o mențineți deschisă atât timp cât
+procesul este încă în desfășurare.
 
 # 3. Virtual Memory
 
