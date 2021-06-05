@@ -93,3 +93,17 @@ Cand un thread nou incearca sa asigure lock-ul prima data se verifica daca lock-
 > B5: Secventa de evenimente la apelarea `lock_release()` in cazul in care se cere un lock la care asteapta un proces cu o prioritate mai mare?
 
 Cand un thread incearca sa elibereze un clock acesta verifica daca a primit o donatie de prioritate de la orice thread existent iar in cazul in care a primit o donatie de prioritate acesta o inlatura din lista de donatii, prioritati si din lista de recipienti. Thread-ul pe urma deblockeaza lock-ul pentru a putea fi preluat de alt thread.
+
+## Sincronizarea
+
+> Potentialele desincronizari la rularea `thread_set_priority()` si cum evitam aceste desincronizari?
+
+O potentiala desincronizare in `thread_set_priority()` poate aparea atunci cand se incearca preluarea prioritatii donate de la inceputul listei. Desincronizarea se poate produce atunci cand incercam sa preluam accessul de la varful liste in timp ce se adauga/scoate o donatie de prioritati. Pentru a mitiga aceasta situatie facem inaccesibile intreruperile inainte de acesarea si modificarea listei de prioritati.
+
+## Notite
+
+Mentinem functionalitatea deja existenta a proiectului pintos iar toate listele sunt sortate dupa prioritate in vederea realizarii unei performante mai bune.
+
+# Advanced Scheduler
+
+Nu exista adaugari
