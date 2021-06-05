@@ -11,30 +11,30 @@
 
 ## 1. Threads (Florin)
 
-- Alarm Clock 
-- Priority Scheduling 
-- Advanced Scheduler
+- Alarm Clock ✔️ 
+- Priority Scheduling ✔️ 
+- Advanced Scheduler ❌
 
 ## 2. User Programs (Raluca, Ovidiu, Florin, Filip)
 
-- Process Termination Messages
-- Argument Passing
-- System Calls
-- Denying Writes to Executables
+- Process Termination Messages ✔️ 
+- Argument Passing ✔️ 
+- System Calls ✔️ 
+- Denying Writes to Executables ✔️ 
 
-## 3. Virtual Memory (Filip)
+## 3. Virtual Memory (Filip, Raluca)
 
-- Paging
-- Stack Growth
-- Memory Mapped Files
-- Accessing User Memory
+- Paging ✔️ 
+- Stack Growth ❌
+- Memory Mapped Files ✔️ 
+- Accessing User Memory ❌
 
-## 4. File Systems (Nu a fost acoperit)
+## 4. File Systems
 
-- Indexed and Extensible Files
-- Subdirectories
-- Buffer Cache
-- Synchronization
+- Indexed and Extensible Files ❌
+- Subdirectories ❌
+- Buffer Cache ❌
+- Synchronization ❌
 
 # 1. Threads
 
