@@ -46,7 +46,7 @@ Procesul de validare care verifica potentialele thread-uri care se pot trezi si 
 Lista de thread-uri este sortata iar intrerrupt handler-ul va verifica de la varful listei si pe urma cele cu cea mai mica durata de somn (sleep). Daca un thread nu este pregatit sa se trezeasca (wake up) atunci se ignora restul listei pana la urmatoarea verificare.
 
 
-## Suncronizarea
+## Sincronizarea
 
 > Cum evitam problemele de sincronizare cand se face call la mai multe thread-uri?
 
