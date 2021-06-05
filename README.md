@@ -9,27 +9,27 @@
 - Ovidiu Miches
 - Florin Suciu
 
-## 1. Threads
+## 1. Threads (Florin)
 
-- Alarm Clock
-- Priority Scheduling
+- Alarm Clock 
+- Priority Scheduling 
 - Advanced Scheduler
 
-## 2. User Programs
+## 2. User Programs (Raluca, Ovidiu, Florin, Filip)
 
 - Process Termination Messages
 - Argument Passing
--  System Calls
+- System Calls
 - Denying Writes to Executables
 
-## 3. Virtual Memory
+## 3. Virtual Memory (Filip)
 
 - Paging
 - Stack Growth
 - Memory Mapped Files
 - Accessing User Memory
 
-## 4. File Systems
+## 4. File Systems (Nu a fost acoperit)
 
 - Indexed and Extensible Files
 - Subdirectories
