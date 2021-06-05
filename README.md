@@ -1,11 +1,11 @@
 # proiect_pintos
 
-Proiect PINTOS
+## Proiect PINTOS la SOA
 
-Studenti
+###### Studenti
 
-Raluca Popa
-Filip Popa
-Ovidiu Miches
-Florin Suciu
+- Raluca Popa
+- Filip Popa
+- Ovidiu Miches
+- Florin Suciu
 
