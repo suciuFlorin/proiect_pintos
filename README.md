@@ -1,8 +1,8 @@
 # proiect_pintos
 
-## Proiect PINTOS la SOA
+## Proiectul PINTOS la Sisteme de Operare Avansate (SOA)
 
-###### Studenti
+## Studenti
 
 - Raluca Popa
 - Filip Popa
