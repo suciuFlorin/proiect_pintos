@@ -2,6 +2,9 @@
 
 ## Proiectul PINTOS la Sisteme de Operare Avansate (SOA)
 
+> Filmarea: 
+> https://uoradea-my.sharepoint.com/:v:/g/personal/suciu_florinromulus_student_uoradea_ro/EU1d7-TYvH5IuxqytkiXn6kBOY4pXi0ghDwtO0KUqqmK1g?e=V5s9nC
+
 ## Studenti
 
 - Raluca Popa
