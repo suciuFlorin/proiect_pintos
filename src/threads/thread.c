@@ -179,7 +179,7 @@ tid_t thread_create(const char *name, int priority,
   init_thread(t, name, priority);
   tid = t->tid = allocate_tid();
 
-  /* Pregatirea thread-ului de initializare in lista */
+   /* Pregatirea thread-ului de initializare in lista */
   old_level = intr_disable();
 
   /* Stack frame for kernel_thread(). */
@@ -240,6 +240,8 @@ void thread_unblock(struct thread *t)
   old_level = intr_disable();
   ASSERT(t->status == THREAD_BLOCKED);
 
+  list_push_back(&ready_list, &t->elem);
+  
   /* Adauga thread-ul in ready list in ordinea prioritatilor si ii schimba status-ul in READY */
   list_insert_ordered(&ready_list, &t->elem, thread_priority_compare, NULL);
   t->status = THREAD_READY;
@@ -285,6 +287,9 @@ void thread_exit(void)
 {
   ASSERT(!intr_context());
 
+  /* Tell my parent thread to stop waiting. */
+  sema_up(&thread_current()->being_waited_on);
+
 #ifdef USERPROG
   process_exit();
 #endif
@@ -311,6 +316,8 @@ void thread_yield(void)
   old_level = intr_disable();
   if (cur != idle_thread)
   {
+    list_push_back(&ready_list, &cur->elem);
+
     /* Insereaza tread-ul ce cedeaza prioritate in ready list dupa prioritatea curenta */
     list_insert_ordered(&ready_list, &cur->elem, thread_priority_compare, NULL);
   }
@@ -496,11 +503,28 @@ init_thread(struct thread *t, const char *name, int priority)
   t->priority = priority;
   t->magic = THREAD_MAGIC;
 
-  /* Initialize the donated_priorities list. */
+    /* Initialize the donated_priorities list. */
   list_init(&t->donated_priorities);
 
   /* Initialize the priority_recipients list. */
   list_init(&t->priority_recipients);
+
+  /* Init the threads list of processes it creates. */
+  list_init(&t->child_process_list);
+
+  /* Init the list of file descriptors for this thread, which holds all of the files that this thread has open. */
+  list_init(&t->file_descriptors);
+
+  /* Initalize the next available file descriptor to 2 (0 and 1 are reserved
+     for STDIN and STDOUT, respectively). */
+  t->cur_fd = 2;
+
+  /* Init the semaphore in charge of putting a parent thread to sleep. */
+  sema_init(&t->being_waited_on, 0);
+
+  /* We assume the exit status is bad, unless exit() is properly
+     called (and it is assigned otherwise). */
+  t->exit_status = -1;
 
   list_push_back(&all_list, &t->allelem);
 }
